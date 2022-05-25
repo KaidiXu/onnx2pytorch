@@ -26,7 +26,7 @@ class Split(Operator):
             split_size_or_sections is not None or number_of_splits is not None
         ), "One of the parameters needs to be set."
         self.dim = dim
-        self.split_size_or_sections = split_size_or_sections
+        self.split_size_or_sections = (split_size_or_sections[0], 1)
         self.number_of_splits = number_of_splits
         self.keep_size = keep_size
         self.input_indices = None
@@ -56,6 +56,7 @@ class Split(Operator):
             )
             split = torch.split(self.placeholder, self.split_size_or_sections, self.dim)
         else:
+            # split = torch.split(*input, self.split_size_or_sections, dim=self.dim)
             split = torch.split(*input, self.split_size_or_sections, dim=self.dim)
         return split
 

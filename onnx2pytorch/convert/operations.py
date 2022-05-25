@@ -156,6 +156,10 @@ def convert_operations(onnx_model, batch_dim=0):
             kwargs = dict(keepdim=True)
             kwargs.update(extract_attributes(node))
             op = partial(torch.mean, **kwargs)
+        elif node.op_type == "ReduceSum":
+            kwargs = dict(keepdim=True)
+            kwargs.update(extract_attributes(node))
+            op = partial(torch.sum, **kwargs)
         elif node.op_type == "Add":
             op = Add(feature_dim=batch_dim + 1)  # 0 for CV models and 1 for NLP
         elif node.op_type == "GlobalAveragePool":
