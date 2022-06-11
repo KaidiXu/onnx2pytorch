@@ -72,6 +72,10 @@ class ConvertModel(nn.Module):
 
         replace_bn = False
         modules_list = list(self.modules())[1:]
+
+        # FIXME Do not use modules_list -- some layers which are not nn.Module's are missing
+        # TODO We can do it out of onnx2pytorch
+
         for i, m in enumerate(modules_list):
             if type(m) == Sub and type(modules_list[i+1]) == Div:
                 bn_idx = i
