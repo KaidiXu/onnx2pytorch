@@ -12,6 +12,7 @@ class Transpose(nn.Module):
             dims = tuple(reversed(range(data.dim())))
         else:
             dims = self.dims
+        # if the first dim is batch size, manually add the batch size to the shape
         if len(data.shape)==len(dims)+1:
             dims = tuple([0]+[tmp+1 for tmp in dims])
         transposed = data.permute(dims)
