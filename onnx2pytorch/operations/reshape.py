@@ -52,6 +52,9 @@ class Reshape(Operator):
         else:
             # This raises RuntimeWarning: iterating over a tensor.
             # FIXME: this looks not right.
+            # if the first dim is batch size, manually add the batch size to the shape
+            if len(input.size())==len(shape)+1:
+                shape = torch.tensor([input.size(0)]+shape.tolist(),device=shape.device)
             shape = [x if x != 0 else input.size(i) for i, x in enumerate(shape)]
         if not self.enable_pruning:
             return torch.reshape(input, tuple(shape))
