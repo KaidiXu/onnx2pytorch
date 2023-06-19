@@ -158,15 +158,11 @@ def convert_operations(onnx_graph, opset_version, batch_dim=0, enable_pruning=Tr
                 else:
                     op = nn.Linear(weight.shape[0], weight.shape[1], bias=False)
                     op.weight.data = weight.t()
-                    
+
                 # check if next node Add to add bias
                 if i + 1 < len(onnx_graph.node):
                     next_node = onnx_graph.node[i + 1]
-                    next_params = [
-                        weights[par_name]
-                        for par_name in next_node.input
-                        if par_name in weights
-                    ]
+                    next_params = [weights[par_name] for par_name in next_node.input if par_name in weights]
                     if next_params and next_node.op_type == "Add":
                         bias = torch.from_numpy(numpy_helper.to_array(next_params[0]))
                         op.bias = nn.Parameter(bias)
@@ -222,9 +218,7 @@ def convert_operations(onnx_graph, opset_version, batch_dim=0, enable_pruning=Tr
         elif node.op_type == "Relu":
             op = nn.ReLU(inplace=True)
         elif node.op_type == "Reshape":
-            shape = list(
-                filter(lambda x: x.name == node.input[1], onnx_graph.initializer)
-            )
+            shape = list(filter(lambda x: x.name == node.input[1], onnx_graph.initializer))
             shape = np.copy(numpy_helper.to_array(shape[0])) if shape else None
             op = Reshape(enable_pruning, shape, quirks=quirks.get("Reshape"))
         elif node.op_type == "Resize":
@@ -271,7 +265,7 @@ def convert_operations(onnx_graph, opset_version, batch_dim=0, enable_pruning=Tr
         elif node.op_type == "TopK":
             op = TopK()
         elif node.op_type == "Transpose":
-            op = Transpose(**extract_attributes(node))
+            op = Transpose(**{**extract_attributes(node), **{"quirks": quirks.get("Transpose", {})}})
         elif node.op_type == "Unsqueeze":
             op = Unsqueeze(opset_version=opset_version, **extract_attributes(node))
         elif node.op_type == "Upsample":
@@ -285,13 +279,9 @@ def convert_operations(onnx_graph, opset_version, batch_dim=0, enable_pruning=Tr
         else:
             op = getattr(torch, node.op_type.lower(), None)
             if op is None:
-                raise NotImplementedError(
-                    "Conversion not implemented for op_type={}.".format(node.op_type)
-                )
+                raise NotImplementedError("Conversion not implemented for op_type={}.".format(node.op_type))
             else:
-                print(
-                    "Automatic inference of operator: {}".format(node.op_type.lower())
-                )
+                print("Automatic inference of operator: {}".format(node.op_type.lower()))
 
         op_name = "{}_{}".format(node.op_type, node.output[0])
         op_id = node.output[0]

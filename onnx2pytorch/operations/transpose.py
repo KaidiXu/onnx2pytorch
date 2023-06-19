@@ -13,7 +13,7 @@ class Transpose(nn.Module):
         else:
             dims = self.dims
         # if the first dim is batch size, manually add the batch size to the shape
-        if len(data.shape)==len(dims)+1:
-            dims = tuple([0]+[tmp+1 for tmp in dims])
+        if len(data.shape) == len(dims) + 1 and self.quirks.get("merge_batch_size_with_channel"):
+            dims = tuple([0] + [tmp + 1 for tmp in dims])
         transposed = data.permute(dims)
         return transposed
