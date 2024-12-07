@@ -102,6 +102,8 @@ def extract_attributes(node):
                     "Pytorch's interpolate uses no coordinate_transformation_mode={}. "
                     "Result might differ.".format(arg)
                 )
+        elif attr.name == "count_include_pad":
+            kwargs["count_include_pad"] = bool(extract_attr_values(attr))
         elif attr.name == "dilations":
             kwargs["dilation"] = extract_attr_values(attr)
         elif attr.name == "direction":
@@ -184,7 +186,7 @@ def extract_attributes(node):
         elif attr.name == "broadcast":
             # Broadcasting should be supported by PyTorch (and onnx since version 7) by default
             pass
-        elif node.op_type == "Resize":  
+        elif node.op_type == "Resize":
             # These parameters are not used, warn in Resize operator
             kwargs[attr.name] = extract_attr_values(attr)
         else:
